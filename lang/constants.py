@@ -4,9 +4,9 @@ INT_LITERAL = 1
 STRING_LITERAL = 2
 FLOAT_LITERAL = 3
 
-KW_FN = 100
+KW_FUNCTION = 100
 KW_RAW = 101
-KW_RET = 102
+KW_RETURN = 102
 KW_VAR = 103
 
 SEMICOLON = 200
@@ -27,13 +27,13 @@ GREATER_EQUAL = 214
 DOUBLE_EQUAL = 215
 NOT_EQUAL = 216
 EQUAL = 217
-
+DOT = 218
 
 def find_word_type(raw_word: str) -> int:
     word_table = {
-        "fn": KW_FN,
+        "function": KW_FUNCTION,
         "raw": KW_RAW,
-        "ret": KW_RET,
+        "return": KW_RETURN,
         "var": KW_VAR
     }
     return word_table.get(raw_word, ID)
@@ -46,9 +46,9 @@ def get_constants_name(constants: int) -> str:
         1: "integer",
         2: "string",
         3: "float",
-        100: "fn keyword",
+        100: "function keyword",
         101: "raw keyword",
-        102: "ret keyword",
+        102: "return keyword",
         103: "var keyword",
         200: ";",
         201: "(",
@@ -67,6 +67,7 @@ def get_constants_name(constants: int) -> str:
         214: "greater equals(>=)",
         215: "double equals(==)",
         216: "not equals(!=)",
-        217: "equals(=)"
+        217: "equals(=)",
+        218: "dot(.)"
     }
     return name_table.get(constants, f"undefined(plz define id: {constants})")

@@ -11,6 +11,7 @@ from lang.utils.parserUtils import (Program,
                                     ReturnStatement,
                                     BinaryExpression,
                                     FunctionDeclaration,
+                                    VariableDeclaration,
                                     ExpressionStatement,
                                     Trace)
 
@@ -31,23 +32,38 @@ class Parse:
         statements: list[Statement] = list()
         while self.tokens.has_token():
             tokens = self.tokens.get()
-            if tokens.is_of_type(constants.KW_FN):
+            if tokens.is_of_type(constants.KW_FUNCTION):
                 if len(self.stack_trace) != 1:
-                    raise LoomSyntaxError("function declaration inside another method or sub-block is not allowed")
+                    raise LoomSyntaxError(
+                        "function declaration inside another method or sub-block is not allowed",
+                        self.tokens.get().get_line()
+                    )
                 statements.append(self.parse_function())
+            elif tokens.is_of_type(constants.KW_VAR):
+                statements.append(self.parse_var())
+            elif tokens.is_of_type(constants.KW_RETURN):
+                statements.append(self.parse_return())
             elif tokens.is_of_type(constants.CLOSE_BRACE):
                 self.stack_trace.pop()
                 return statements
-            elif tokens.is_of_type(constants.KW_RET):
-                statements.append(self.parse_return())
             else:
                 statements.append(self.parse_expression())
                 self.tokens.expect_consume(1, constants.SEMICOLON)
         return statements
 
+    def parse_var(self) -> Statement:
+        token = self.tokens.get()
+        self.tokens.expect_consume(1, constants.KW_VAR)
+        raw_identifier = self.tokens.expect_consume(1, constants.ID)
+        identifier = Identifier(raw_identifier.get_raw(), raw_identifier.get_line())
+        self.tokens.expect_consume(1, constants.EQUAL)
+        init = self.parse_expression()
+        self.tokens.expect_consume(1, constants.SEMICOLON)
+        return VariableDeclaration(identifier, init, token.get_line())
+
     def parse_return(self) -> Statement:
         token = self.tokens.get()
-        self.tokens.expect_consume(1, constants.KW_RET)
+        self.tokens.expect_consume(1, constants.KW_RETURN)
         return_statement = ReturnStatement(self.parse_expression(), token.get_line())
         self.tokens.expect_consume(1, constants.SEMICOLON)
         return return_statement
@@ -73,7 +89,7 @@ class Parse:
             token = self.tokens.expect_consume(1, constants.ID)
             name = token.get_raw()
             if name in name_set:    # todo: make it scoped by add it to stack_trace
-                raise LoomSyntaxError(f"re-usage of argument name '{name}'")
+                raise LoomSyntaxError(f"re-usage of argument name '{name}'", token.get_line())
             else:
                 name_set.add(name)
             params.append(Identifier(token.get_raw(), token.get_line()))
@@ -163,4 +179,4 @@ class Parse:
             name: str = token.get_raw()
             self.tokens.move()
             return Identifier(name, token.get_line())
-        raise LoomSyntaxError(f"Invalid literal '{self.tokens.get().get_raw()}'")
+        raise LoomSyntaxError(f"Invalid literal '{token.get_raw()}'", token.get_line())

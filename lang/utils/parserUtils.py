@@ -67,6 +67,13 @@ class ReturnStatement(Statement):
         self.expression = expression
 
 
+class VariableDeclaration(Statement):
+    def __init__(self, identifier: Identifier, init: ExpressionStatement, line: int) -> None:
+        super().__init__(line)
+        self.identifier = identifier
+        self.init = init
+
+
 class RawCodeStatement(Statement):
     def __init__(self, code: int, params: list[any], line: int) -> None:
         super().__init__(line)

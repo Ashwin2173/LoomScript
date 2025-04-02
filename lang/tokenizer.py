@@ -31,6 +31,8 @@ class Lexer:
                 self.__make_token(integer, constants.INT_LITERAL)
             elif char == '"' or char == "'":
                 self.__make_token(self.__tokenize_string(), constants.STRING_LITERAL)
+            elif char == '.':
+                self.__make_token(self.__tokenize_string(), constants.DOT)
             elif char == '(':
                 self.__make_token('(', constants.OPEN_PARAM)
             elif char == ')':
@@ -82,7 +84,8 @@ class Lexer:
     def __tokenize_string(self) -> str:
         start_index = self.index
         while not self.__is_eof() and self.__next() != self.program[start_index]:
-            continue
+            if self.__peek() == '\n':
+                self.line += 1
         return self.program[start_index + 1: self.index]
 
     def __tokenize_number(self) -> str:
@@ -96,7 +99,8 @@ class Lexer:
     def __tokenize_word(self) -> str:
         start_index = self.index
         while not self.__is_eof() and is_valid_identifier_char(self.__next()):
-            continue
+            if self.__peek() == '\n':
+                self.line += 1
         word = self.program[start_index: self.index]
         self.index -= 1
         return word

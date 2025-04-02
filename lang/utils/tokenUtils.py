@@ -43,7 +43,7 @@ class TokenIterator:
         token = self.get()
         if token.get_type() not in expected_type:
             types = list(map(get_constants_name, expected_type))
-            raise LoomSyntaxError(f"expected {'or'.join(types)}, but got {token.get_raw()}")
+            raise LoomSyntaxError(f"expected {'or'.join(types)}, but got {token.get_raw()}", token.get_line())
         self.move(offset)
         return token
 
@@ -53,7 +53,10 @@ class TokenIterator:
         if token is None or token.get_type() not in expected_type:
             expected_names = list(map(get_constants_name, expected_type))
             got_string = token.get_raw() if token is not None else 'nothing'
-            raise LoomSyntaxError(f"expected {'or'.join(expected_names)}, but got {got_string}")
+            raise LoomSyntaxError(
+                f"expected {'or'.join(expected_names)}, but got {got_string}",
+                token.get_line() if token is not None else None
+            )
         return token
 
     def has_token(self) -> bool:
